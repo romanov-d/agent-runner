@@ -1,0 +1,26 @@
+{
+  "name": "agent-runner",
+  "version": "0.1.0",
+  "description": "Очередь запусков агентов на PostgreSQL и раннер к ней: ровно один исполнитель на задачу, пульс, повторы, корректная остановка, журнал шагов и учёт стоимости.",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "migrate": "node --experimental-strip-types src/migrate.ts",
+    "demo": "node --experimental-strip-types src/demo.ts",
+    "worker": "node --experimental-strip-types src/worker.ts",
+    "bench": "node --experimental-strip-types src/bench.ts",
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "test:unit": "node --experimental-strip-types --test test/logic.test.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "typescript": "^5.7.2"
+  },
+  "license": "MIT"
+}
