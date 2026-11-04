@@ -10,7 +10,7 @@
     "demo": "node --experimental-strip-types src/demo.ts",
     "worker": "node --experimental-strip-types src/worker.ts",
     "bench": "node --experimental-strip-types src/bench.ts",
-    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "test": "node --experimental-strip-types --test --test-concurrency=1 --test-timeout=120000 test/*.test.ts",
     "test:unit": "node --experimental-strip-types --test test/logic.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

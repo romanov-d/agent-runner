@@ -15,9 +15,13 @@ import { enqueue, getJob, requeueStale } from '../src/queue.ts';
 const online = await dbAvailable();
 const opts = { skip: online ? false : 'нет базы: подними docker compose up db' };
 
+// Порождённые процессы держат цикл событий: если тест упадёт до kill,
+// прогон зависнет навсегда. Поэтому помним всех и добиваем в конце.
+const spawned: ChildProcess[] = [];
+
 /** Свой агент на каждый тест: чужой воркер не отберёт задачу и не испортит прогон. */
 function startWorker(id: string, agent: string): ChildProcess {
-  return spawn(
+  const proc = spawn(
     process.execPath,
     ['--experimental-strip-types', 'src/worker.ts'],
     {
@@ -27,6 +31,8 @@ function startWorker(id: string, agent: string): ChildProcess {
       detached: false,
     },
   );
+  spawned.push(proc);
+  return proc;
 }
 
 /** Дождаться, пока процесс действительно умрёт: kill только посылает сигнал. */
@@ -45,7 +51,15 @@ async function waitFor(check: () => Promise<boolean>, ms = 15_000): Promise<void
 }
 
 describe('падение воркера', opts, () => {
-  after(async () => { await closeDb(); });
+  after(async () => {
+    for (const p of spawned) {
+      if (p.exitCode === null && p.signalCode === null) {
+        p.kill('SIGKILL');
+        await waitExit(p);
+      }
+    }
+    await closeDb();
+  });
 
   test('убитый насмерть воркер: задача возвращается в очередь, попытка потрачена', async () => {
     await resetDb();
